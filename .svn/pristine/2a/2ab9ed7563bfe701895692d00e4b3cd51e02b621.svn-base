@@ -1,0 +1,73 @@
+const path = require('path');
+const entryPath = path.resolve(__dirname, '../src/main.js');
+const outputPath = path.resolve(__dirname, '../dist');
+const { VueLoaderPlugin } = require('vue-loader');
+const htmlPath = path.resolve(__dirname, '../public/index.html');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+
+module.exports = {
+    mode: 'production', // 设置为线上模式
+    entry: {
+        app: entryPath, // 入口
+    },
+    devServer: {
+        port: 3000,
+        open: true,
+        // host: 'localhost', // 只有本地才能打开，其他人访问不了
+        overlay: {
+            warnings: false,
+            errors: true
+        },
+    },
+    output: {
+        path: outputPath,
+        filename: 'js/[name].[hash:8].js',
+        publicPath: '/'
+    },
+    module: {
+        rules: [
+            {
+                test: /\.scss$/,
+                use: [
+                    'css-loader', 'postcss-loader', 'sass-loader'
+                ]
+            },
+            {
+        		test: /\.css$/,
+        		use: [
+					'css-loader', 'postcss-loader'
+        		]
+      		},
+            {
+                test: /\.js$/,
+                use: 'babel-loader',
+                exclude: /node_modules/
+            },
+            {
+                test: /\.vue$/,
+                use: [
+                    'vue-loader'
+                ]
+            },
+            {
+                test: /\.(png|jpg|gif|svg|ttf|eot|woff|otf)$/,
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            name: 'assets/[name].[hash:8].[ext]'
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    plugins: [
+        new VueLoaderPlugin(),
+        new HtmlWebpackPlugin({
+			template: htmlPath,
+			filename: 'index.html',
+			minify: true
+		}),
+    ]
+}

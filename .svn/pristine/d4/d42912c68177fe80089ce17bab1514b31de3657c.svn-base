@@ -1,0 +1,108 @@
+// webpack.dev.js
+const path = require('path');
+const entryPath = path.resolve(__dirname, '../src/main.js');
+const outputPath = path.resolve(__dirname, '../dist');
+const htmlPath = path.resolve(__dirname, '../public/index.html');
+const HappyPack = require('happypack');
+const HappyThreadPool = HappyPack.ThreadPool({
+    size: 2
+});
+const {
+    VueLoaderPlugin
+} = require('vue-loader');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+
+module.exports = {
+    mode: 'development',
+    entry: {
+        app: entryPath
+    },
+    output: {
+        path: outputPath,
+        filename: 'js/[name].[hash:8].js',
+        publicPath: '/'
+    },
+    // devtool: '#cheap-module-eval-source-map',
+    devServer: {
+        port: 8088,
+        open: true,
+        hot: true,
+        client: {
+            overlay: true,
+        },
+    },
+    module: {
+        rules: [{
+                test: /\.vue$/,
+                exclude: /node_modules/,
+                use: [
+                    'vue-loader'
+                ]
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    'style-loader',
+                    // 'happypack/loader?id=css' // 此处会报错
+                ]
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'style-loader',
+                    'css-loader',
+                    'postcss-loader',
+                    'sass-loader'
+                ]
+            },
+            {
+                test: /\.js$/,
+                use: 'happypack/loader?id=babel',
+                exclude: /node_modules/
+            },
+            {
+                test: /\.(png|jpg|gif|svg|ttf|eot|woff|otf)$/,
+                use: [{
+                    loader: 'url-loader',
+                    options: {
+                        name: 'assets/[name].[hash:8].[ext]'
+                    }
+                }]
+            }
+        ]
+    },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin(),
+        new VueLoaderPlugin(),
+        new HtmlWebpackPlugin({
+            template: htmlPath,
+            filename: 'index.html',
+            minify: true
+        }),
+        new HappyPack({
+            id: 'css',
+            threadPool: HappyThreadPool,
+            loaders: ['css-loader', 'postcss-loader'],
+        }),
+        new HappyPack({
+            id: 'babel',
+            loaders: ['babel-loader'],
+            threadPool: HappyThreadPool,
+        }),
+    ],
+    optimization: {
+        runtimeChunk: 'single',
+        splitChunks: {
+            cacheGroups: {
+                vendors: {
+                    name: "vendors",
+                    test: /[\\/]node_modules[\\/]/,
+                    chunks: "all",
+                    priority: -10,
+                    reuseExistingChunk: true,
+                },
+            }
+        }
+    }
+}

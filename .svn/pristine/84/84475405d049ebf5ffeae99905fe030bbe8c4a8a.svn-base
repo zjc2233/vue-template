@@ -1,0 +1,22 @@
+<template>
+    <div id="app1">
+        app
+    </div>
+</template>
+
+<script>
+export default {
+    name: "APP",
+    data() {
+        return {
+        };
+    },
+    mounted(){
+    },
+    methods: {
+    },
+};
+</script>
+<style>
+/* @import "./iconFont/iconfont.css"; */
+</style>
